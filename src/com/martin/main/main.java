@@ -3,7 +3,6 @@ package com.martin.main;
 import com.martin.classes.Car;
 import com.martin.classes.Date;
 import com.martin.classes.Time;
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**
