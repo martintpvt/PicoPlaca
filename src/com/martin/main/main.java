@@ -1,8 +1,13 @@
 package com.martin.main;
 
-import com.martin.classes.Car;
-import com.martin.classes.Date;
-import com.martin.classes.Time;
+import com.martin.models.Car;
+import com.martin.controllers.Car_Controller;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -23,51 +28,97 @@ public class main {
         return input;
     }
     
-    public static void main(String[] args) {
-        Date date = new Date();
-        Time time = new Time();
-        Car car = new Car();
+    private static boolean isRestricted(int lastNumber, Calendar calendar)
+    {
+        boolean restricted = false;
         
+        List<Integer> restrictedDigits = new ArrayList<>();
+        switch(calendar.get(Calendar.DAY_OF_WEEK))
+        {
+            case 1: case 7:
+            {
+                return false;
+            }
+            case 2:
+            {
+                restrictedDigits.add(0);
+                restrictedDigits.add(1);
+                break;
+            }
+            case 3:
+            {
+                restrictedDigits.add(2);
+                restrictedDigits.add(3);
+                break;
+            }
+            case 4:
+            {
+                restrictedDigits.add(4);
+                restrictedDigits.add(5);
+                break;
+            }
+            case 5:
+            {
+                restrictedDigits.add(6);
+                restrictedDigits.add(7);
+                break;
+            }
+            case 6:
+            {
+                restrictedDigits.add(8);
+                restrictedDigits.add(9);
+                break;
+            }
+        }
+        
+        for(int cont = 0; cont < restrictedDigits.size(); cont++)
+        {
+            if(lastNumber == restrictedDigits.get(cont))
+                restricted = true;
+        }
+        
+        return restricted;
+    }
+    
+    public static void main(String[] args) {
         String dateStr;
         String timeStr;
         String plate;
         
-        boolean restricted = false;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd HH:mm");
         
-        do
-        {
-            dateStr = readString("Ingrese la fecha en el formato dd/mm/yyyy");
-        } while(!date.insertDate(dateStr));
+        Date date;
+        Calendar calendar;
         
-        do
-        {
-            timeStr = readString("Ingrese la hora en el formato hh:mm");
-        } while(!time.insertHour(timeStr));
+        Car car;
+        Car_Controller carController = new Car_Controller();
         
-        do
-        {
-            plate = readString("Ingrese la placa del auto en el formato ABC-123 ó ABC-1234");
-        } while(!car.setPlate(plate));
+        dateStr = readString("Ingrese la fecha en el formato yyyy-mm-dd");
+        timeStr = readString("Ingrese la hora en el formato HH:mm");
         
-        if(car.getLastNumber() == date.getRestrictedDigits()[0] || car.getLastNumber() == date.getRestrictedDigits()[1])
+        plate = readString("Ingrese la placa del auto en el formato ABC-0123");
+        
+        car = carController.CreateCar(plate);
+        
+        try
         {
-            if((time.getHour() >= 7 && time.getHour() <= 8) || (time.getHour() >= 16 && time.getHour() <= 18))
+            date = sdf.parse(dateStr + " " + timeStr);
+            
+            calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            
+            if(car != null)
             {
-                restricted = true;
-            } else if(time.getHour() == 9 || time.getHour() == 19)
-            {
-                if(time.getMinute() <= 30)
-                {
-                    restricted = true;
-                }
+                if(isRestricted(carController.GetLastNumber(car), calendar))
+                    System.out.println("Su vehículo NO puede transitar");
+                else
+                    System.out.println("Su vehículo SI puede transitar");
+            } else {
+                System.out.println("No ingreso una placa valida");
             }
-        }
-        
-        if(restricted)
+        } catch (ParseException ex)
         {
-            System.out.println("Su vehículo NO puede transitar.");
-        } else {
-            System.out.println("Su vehículo SI puede transitar.");
+            System.out.println("No ingreso una fecha valida");
         }
     }
     
